@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
-class BranchList extends StatelessWidget {
+class BranchList extends StatefulWidget {
+  @override
+  BranchListState createState() {
+    return BranchListState();
+  }
+}
+
+class BranchListState extends State<BranchList> {
   final List<Map> _branches = [
-    {"branchCode": "BD0014006", "branchName": "PRINCIPAL BR DHAKA"},
-    {"branchCode": "BD0011207", "branchName": "KALIR BAZAR BR"},
     {"branchCode": "BD0013088", "branchName": "ABDUL HAMID ROAD PABNA"},
     {"branchCode": "BD0014664", "branchName": "AGAMASHI LANE BRANCH"},
     {"branchCode": "BD0011016", "branchName": "AGRABAD JN. BLDG. CTNG"},
@@ -25,14 +30,63 @@ class BranchList extends StatelessWidget {
     {"branchCode": "BD0011422", "branchName": "ALLARDARGAH BR 1422"},
     {"branchCode": "BD0016190", "branchName": "AMANAT KHAN SARAK 6190"}
   ];
+  List<Map> _toAppend = [
+    {"branchCode": "BD0014006", "branchName": "PRINCIPAL BR DHAKA"},
+    {"branchCode": "BD0011207", "branchName": "KALIR BAZAR BR"},
+  ];
+
+  ScrollController _controller;
+
+  @override
+  void initState() {
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+    super.initState();
+  }
+
+  void _scrollListener() {
+    if (_controller.offset >= _controller.position.maxScrollExtent &&
+        !_controller.position.outOfRange) {
+      if (_toAppend.length > 0) {
+        setState(() {
+          final map = _toAppend.removeLast();
+          _branches.add(map);
+          print("Scroll end and 1 item added");
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        padding: EdgeInsets.all(8.0),
-        itemBuilder: _listItem,
-        itemCount: _branches.length,
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, 8.0, 16.0, 0.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: "Search branch",
+                  contentPadding: EdgeInsets.all(8.0),
+                  suffixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                controller: _controller,
+                padding: EdgeInsets.all(8.0),
+                itemBuilder: _listItem,
+                itemCount: _branches.length,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -61,14 +115,14 @@ class BranchList extends StatelessWidget {
   }
 
   Widget avatar(String branchName, int index) {
-    List<Color> colors = [Colors.blue, Colors.blueGrey, Colors.teal];
+    //List<Color> colors = [Colors.blue, Colors.blueGrey, Colors.teal];
     return CircleAvatar(
       child: Text(
         branchName.substring(0, 1),
         style: TextStyle(
             color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.w600),
       ),
-      backgroundColor: colors[index % 3],
+      backgroundColor: Colors.blueGrey,
       radius: 24.0,
     );
   }
